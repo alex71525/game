@@ -17,6 +17,7 @@ def terminate():
     pygame.quit()
     sys.exit()
 
+    
 def waitForPlayerToPressKey():
     while True:
         for event in pygame.event.get():
@@ -33,6 +34,7 @@ def playerHasHitBaddie(playerRect, baddies):
         if playerRect.colliderect(b['rect']):
             return True
     return False
+
 
 def removeBaddie(playerRect, baddies):
     for b in baddies[:]:
@@ -190,14 +192,8 @@ while True:
 
         heartChange = False
 
-
-
-
-
         drawText('Score: %s' % {score}, font1, win, 5, 0)
         drawText('Record %s' % {topScore}, font1, win, 5, 30)
-
-
 
         if playerHasHitBaddie(playerRect, baddies):
             removeBaddie(playerRect, baddies)
