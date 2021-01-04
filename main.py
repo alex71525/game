@@ -189,7 +189,7 @@ while True:
             baddieMaxSpeed += 1
             moreSpeedCount = 0
             baddieAddCounter = 0
-            if addNewBaddieRate > 4:
+            if addNewBaddieRate > 6:
                 addNewBaddieRate -= 2
 
         if moveLeft and playerRect.left > 0:
