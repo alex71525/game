@@ -189,7 +189,7 @@ while True:
             baddieMaxSpeed += 1
             moreSpeedCount = 0
             baddieAddCounter = 0
-            if addNewBaddieRate > 1:
+            if addNewBaddieRate > 4:
                 addNewBaddieRate -= 2
 
         if moveLeft and playerRect.left > 0:
@@ -212,15 +212,15 @@ while True:
         win.blit(backgroundImage, (0, 0))
         win.blit(playerImage, playerRect)
 
-        for i in hearts:
-            win.blit(fullHeartImage, i['rect'])
-        for i in emptyHearts:
-            win.blit(emptyHeartImage, i['rect'])
-
         for b in baddies:
             win.blit(b['surface'], b['rect'])
         for i in extraLife:
             win.blit(fullHeartImage, i['rect'])
+
+        for i in hearts:
+            win.blit(fullHeartImage, i['rect'])
+        for i in emptyHearts:
+            win.blit(emptyHeartImage, i['rect'])
 
         if playerHasHitHeart(playerRect, extraLife):
             healSound.play()
