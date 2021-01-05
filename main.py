@@ -10,7 +10,7 @@ FPS = 120
 baddieMinSize = 20
 baddieMaxSize = 50
 moreSpeedRate = 1200
-playerSpeed = 8
+playerSpeed = 4
 
 
 def terminate():
@@ -60,10 +60,37 @@ def playerHasHitHeart(playerRect, extraLife):
             return True
     return False
 
+
 def removeHeart(playerRect, extraLife):
     for i in extraLife:
         if playerRect.colliderect(i['rect']):
             extraLife.remove(i)
+
+
+def playerHasHitShield(playerRect, shields):
+    for i in shields:
+        if playerRect.colliderect(i['rect']):
+            return True
+    return False
+
+
+def removeShield(playerRect, shields):
+    for i in shields:
+        if playerRect.colliderect(i['rect']):
+            shields.remove(i)
+
+def meteorHasHitShield(shieldRect, baddies):
+    for b in baddies:
+        if shieldRect.colliderect(b['rect']):
+            return True
+    return False
+
+
+def removeMeteorCollideShield(shieldRect, baddies):
+    for b in baddies[:]:
+        if shieldRect.colliderect(b['rect']):
+            baddies.remove(b)
+
 
 
 def drawText(text, font, surface, x, y):
@@ -78,6 +105,7 @@ mainClock = pygame.time.Clock()
 win = pygame.display.set_mode((winWidth, winHeight), pygame.RESIZABLE)
 pygame.display.set_caption('Game')
 pygame.mouse.set_visible(False)
+pygame.event.set_grab(True)
 
 font = pygame.font.SysFont(None, 40)
 font1 = pygame.font.SysFont(None, 32)
@@ -85,6 +113,9 @@ gameOverSound = pygame.mixer.Sound('game_over.mp3')
 colisionSound = pygame.mixer.Sound('colisionSound.mp3')
 healSound = pygame.mixer.Sound('healEffect.mp3')
 pygame.mixer.music.load('backgroundMusic.mp3')
+gameOverSound.set_volume(0.5)
+healSound.set_volume(0.3)
+colisionSound.set_volume(0.35)
 
 playerImage = pygame.image.load('ship.png')
 playerRect = playerImage.get_rect()
@@ -92,6 +123,9 @@ baddieImage = pygame.image.load('meteor.png')
 backgroundImage = pygame.image.load('background.png')
 fullHeartImage = pygame.image.load('heartFull.png')
 emptyHeartImage = pygame.image.load('heartEmpty.png')
+shield = pygame.image.load('shield.png')
+shieldEffect = pygame.image.load('shieldEffect.png')
+shieldRect = shieldEffect.get_rect()
 zaplatka = pygame.image.load('background1.png')
 
 win.blit(backgroundImage, (0, 0))
@@ -105,15 +139,18 @@ topScore = 0
 while True:
     baddieMinSpeed = 1
     baddieMaxSpeed = 5
-    addNewBaddieRate = 16
+    addNewBaddieRate = 14
     baddies = []
     hearts = []
+    shields = []
     emptyHearts = []
     heartChange = False
+    shieldUse = False
+    shieldCount = 0
     extraLife = []
     score = 0
     moreSpeedCount = 0
-    heartQuantity = 5
+    heartQuantity = 3
     topHeartQuantity = heartQuantity
     playerRect.topleft = (winWidth / 2, winHeight - 85)
     moveLeft = moveRight = moveUp = moveDown = False
@@ -156,8 +193,12 @@ while True:
                     moveDown = False
 
             if event.type == MOUSEMOTION:
-                playerRect.centerx = event.pos[0]
-                playerRect.centery = event.pos[1]
+                if event.pos[0] < winWidth - 64:
+                    playerRect.left = event.pos[0]
+                    shieldRect.left = event.pos[0] - 13
+                if event.pos[1] > 50:
+                    playerRect.bottom = event.pos[1]
+                    shieldRect.bottom = event.pos[1] + 19
 
         baddieAddCounter += 0.5
         moreSpeedCount += 0.5
@@ -170,16 +211,32 @@ while True:
                          'surface': pygame.transform.scale(baddieImage, (baddieSize, baddieSize))}
             baddies.append(newBaddie)
 
-        randomNumber = random.randint(0, 3000)
+        randomNumber = random.randint(0, 3500)
         if randomNumber == 7 and score > 1000:
             extraHeart = {'rect': pygame.Rect(random.randint(0, winWidth - 40), -34, 40, 34),
                           'speed': random.randint(2, 5)}
             extraLife.append(extraHeart)
 
+        randomNumber1 = random.randint(0, 3500)
+        if randomNumber1 == 7 and score > 1000:
+            newShield = {'rect': pygame.Rect(random.randint(0, winWidth - 40), -34, 40, 34),
+                         'speed': random.randint(2, 5)}
+            shields.append(newShield)
+
         if score % 2 == 0:
+            for b in baddies:
+                b['rect'].move_ip(0, b['speed'])
             for i in extraLife:
                 i['rect'].move_ip(0, i['speed'])
+            for i in shields:
+                i['rect'].move_ip(0, i['speed'])
 
+        for b in baddies[:]:
+            if b['rect'].top > winHeight:
+                baddies.remove(b)
+        for i in shields[:]:
+            if i['rect'].top > winHeight:
+                shields.remove(i)
         for i in extraLife[:]:
             if i['rect'].top > winHeight:
                 extraLife.remove(i)
@@ -189,25 +246,21 @@ while True:
             baddieMaxSpeed += 1
             moreSpeedCount = 0
             baddieAddCounter = 0
-            if addNewBaddieRate > 6:
-                addNewBaddieRate -= 2
+            if addNewBaddieRate > 4:
+                addNewBaddieRate -= 1
 
         if moveLeft and playerRect.left > 0:
             playerRect.move_ip(-1 * playerSpeed, 0)
+            shieldRect.move_ip(-1 * playerSpeed, 0)
         if moveRight and playerRect.right < winWidth:
             playerRect.move_ip(playerSpeed, 0)
+            shieldRect.move_ip(playerSpeed, 0)
         if moveUp and playerRect.top > 0:
             playerRect.move_ip(0, -1 * playerSpeed)
+            shieldRect.move_ip(0, -1 * playerSpeed)
         if moveDown and playerRect.bottom < winHeight:
             playerRect.move_ip(0, playerSpeed)
-
-        if score % 2 == 0:
-            for b in baddies:
-                b['rect'].move_ip(0, b['speed'])
-
-        for b in baddies[:]:
-            if b['rect'].top > winHeight:
-                baddies.remove(b)
+            shieldRect.move_ip(0, playerSpeed)
 
         win.blit(backgroundImage, (0, 0))
         win.blit(playerImage, playerRect)
@@ -216,11 +269,43 @@ while True:
             win.blit(b['surface'], b['rect'])
         for i in extraLife:
             win.blit(fullHeartImage, i['rect'])
+        for i in shields:
+            win.blit(shield, i['rect'])
 
         for i in hearts:
             win.blit(fullHeartImage, i['rect'])
         for i in emptyHearts:
             win.blit(emptyHeartImage, i['rect'])
+
+        if playerHasHitShield(playerRect, shields):
+            shieldCount = 0
+            removeShield(playerRect, shields)
+            win.blit(shieldEffect, shieldRect)
+            shieldUse = True
+            t = 30
+            k = 0
+
+        if shieldUse:
+            if shieldCount < 1200:
+                if meteorHasHitShield(shieldRect, baddies):
+                    removeMeteorCollideShield(shieldRect, baddies)
+                if shieldCount > 840:
+                    if k < t:
+                        win.blit(shieldEffect, shieldRect)
+                        k += 1
+                    elif k < 2 * t:
+                        k += 1
+                    elif k == 2 * t:
+                        t = 30
+                        k = 0
+                else:
+                    win.blit(shieldEffect, shieldRect)
+                shieldCount += 1
+            else:
+                shieldCount = 0
+                shieldUse = False
+                t = 60
+                k = 0
 
         if playerHasHitHeart(playerRect, extraLife):
             healSound.play()
