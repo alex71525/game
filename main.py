@@ -109,13 +109,13 @@ pygame.event.set_grab(True)
 
 font = pygame.font.SysFont(None, 40)
 font1 = pygame.font.SysFont(None, 32)
-gameOverSound = pygame.mixer.Sound('game_over.mp3')
-colisionSound = pygame.mixer.Sound('colisionSound.mp3')
-healSound = pygame.mixer.Sound('healEffect.mp3')
-pygame.mixer.music.load('backgroundMusic.mp3')
+gameOverSound = pygame.mixer.Sound('game_over.wav')
+collisionSound = pygame.mixer.Sound('collisionSound.wav')
+healSound = pygame.mixer.Sound('healEffect.wav')
+pygame.mixer.music.load('backgroundMusic.wav')
 gameOverSound.set_volume(0.5)
 healSound.set_volume(0.3)
-colisionSound.set_volume(0.35)
+collisionSound.set_volume(0.35)
 
 playerImage = pygame.image.load('ship.png')
 playerRect = playerImage.get_rect()
@@ -318,7 +318,7 @@ while True:
             heartChange = True
 
         if playerHasHitBaddie(playerRect, baddies):
-            colisionSound.play()
+            collisionSound.play()
             removeBaddie(playerRect, baddies)
             heartQuantity -= 1
             heartChange = True
