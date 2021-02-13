@@ -206,6 +206,8 @@ while True:
                 if event.key == K_DOWN or event.key == K_s:
                     moveUp = False
                     moveDown = True
+                if event.key == K_SPACE:
+                    shoot = True
             if event.type == KEYUP:
                 if event.key == K_RIGHT or event.key == K_d:
                     moveRight = False
