@@ -142,10 +142,10 @@ emptyHeartImage = pygame.image.load('heartEmpty.png')
 shield = pygame.image.load('shield.png')
 shieldEffect = pygame.image.load('shieldEffect.png')
 shieldRect = shieldEffect.get_rect()
+zaplatka = pygame.image.load('background1.png')
 bullet = pygame.image.load('bullet.png')
 bulletRect = bullet.get_rect()
 bonus = pygame.image.load('bonus.png')
-zaplatka = pygame.image.load('background1.png')
 
 win.blit(backgroundImage, (0, 0))
 
@@ -230,8 +230,21 @@ while True:
                     playerRect.bottom = event.pos[1]
                     shieldRect.bottom = event.pos[1] + 19
 
+
+        if moveLeft and playerRect.left > 0:
+            playerRect.move_ip(-1 * playerSpeed, 0)
+            shieldRect.move_ip(-1 * playerSpeed, 0)
+        if moveRight and playerRect.right < winWidth:
+            playerRect.move_ip(playerSpeed, 0)
+            shieldRect.move_ip(playerSpeed, 0)
+        if moveUp and playerRect.top > 0:
+            playerRect.move_ip(0, -1 * playerSpeed)
+            shieldRect.move_ip(0, -1 * playerSpeed)
+        if moveDown and playerRect.bottom < winHeight:
+            playerRect.move_ip(0, playerSpeed)
+            shieldRect.move_ip(0, playerSpeed)
+
         meteorAddCounter += 0.5
-        moreSpeedCount += 0.5
         if meteorAddCounter == addNewMeteorRate:
             meteorAddCounter = 0
             meteorSize = random.randint(meteorMinSize, meteorMaxSize)
@@ -240,6 +253,15 @@ while True:
                          'speed': random.randint(meteorMinSpeed, meteorMaxSpeed),
                          'surface': pygame.transform.scale(meteorImage, (meteorSize, meteorSize))}
             meteors.append(newMeteor)
+
+        moreSpeedCount += 0.5
+        if moreSpeedRate == moreSpeedCount:
+            meteorMinSpeed += 1
+            meteorMaxSpeed += 1
+            moreSpeedCount = 0
+            meteorAddCounter = 0
+            if addNewMeteorRate > 4:
+                addNewMeteorRate -= 1
 
         randomNumber = random.randint(0, 3500)
         if randomNumber == 7 and score > 1000:
@@ -253,7 +275,7 @@ while True:
                          'speed': random.randint(2, 5)}
             shields.append(newShield)
 
-        randomNumber2 = random.randint(0, 2000)
+        randomNumber2 = random.randint(0, 2500)
         if randomNumber2 == 7:
             newBonus = {'rect': pygame.Rect(random.randint(0, winWidth - 22), -29, 22, 29),
                         'speed': random.randint(2, 5)}
@@ -283,27 +305,6 @@ while True:
         for i in bullets[:]:
             if i['rect'].bottom < 0:
                 bullets.remove(i)
-
-        if moreSpeedRate == moreSpeedCount:
-            meteorMinSpeed += 1
-            meteorMaxSpeed += 1
-            moreSpeedCount = 0
-            meteorAddCounter = 0
-            if addNewMeteorRate > 4:
-                addNewMeteorRate -= 1
-
-        if moveLeft and playerRect.left > 0:
-            playerRect.move_ip(-1 * playerSpeed, 0)
-            shieldRect.move_ip(-1 * playerSpeed, 0)
-        if moveRight and playerRect.right < winWidth:
-            playerRect.move_ip(playerSpeed, 0)
-            shieldRect.move_ip(playerSpeed, 0)
-        if moveUp and playerRect.top > 0:
-            playerRect.move_ip(0, -1 * playerSpeed)
-            shieldRect.move_ip(0, -1 * playerSpeed)
-        if moveDown and playerRect.bottom < winHeight:
-            playerRect.move_ip(0, playerSpeed)
-            shieldRect.move_ip(0, playerSpeed)
 
         win.blit(backgroundImage, (0, 0))
         win.blit(playerImage, playerRect)
