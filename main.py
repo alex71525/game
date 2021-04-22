@@ -114,7 +114,7 @@ pygame.init()
 mainClock = pygame.time.Clock()
 win = pygame.display.set_mode((winWidth, winHeight), pygame.RESIZABLE)
 pygame.display.set_caption('Game')
-pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(True)
 pygame.event.set_grab(True)
 
 font = pygame.font.SysFont(None, 40)
@@ -149,13 +149,195 @@ bonus = pygame.image.load('bonus.png')
 
 win.blit(backgroundImage, (0, 0))
 
-drawText('Game', font, win, (winWidth / 2) - 50, (winHeight / 2) - 50)
-drawText('Нажмите любую клавишу для начала игры', font, win, (winWidth / 2) - 290, (winHeight / 2) + 20)
-pygame.display.flip()
-waitForPlayerToPressKey()
+
+class Button:
+
+    def __init__(self, coords, name, f):
+        self.coords = coords
+        self.name = name
+        self.f = f
+        self.width = 300
+        self.height = 80
+        self.button = pygame.Rect(coords, (self.width, self.height))
+
+    def draw_button(self, screen):
+        pygame.draw.rect(screen, pygame.Color("Green"), self.button, 3)
+        font = pygame.font.Font(None, 60)
+        text = font.render(self.name, 1, pygame.Color("Green"))
+        text_x = self.coords[0] + self.width // 2 - text.get_width() // 2
+        text_y = self.coords[1] + self.height // 2 - text.get_height() // 2
+        text_w = text.get_width()
+        text_h = text.get_height()
+        screen.blit(text, (text_x, text_y))
+
+    def check_button(self, pos):
+        x, y = pos
+        if self.coords[0] <= x <= self.width + self.coords[0] and self.coords[1] <= y <= self.height + self.coords[1]:
+            return True
+        else:
+            return False
+
+
+def do_something():
+    pass
+
+
+def main_menu():
+    screen = pygame.display.set_mode(size)
+    screen.fill((0, 0, 0))
+    menu_name(screen)
+    start_button = Button((200, 300), "Старт", do_something)
+    start_button.draw_button(screen)
+    info_button = Button((200, 400), "Правила", rules_menu)
+    info_button.draw_button(screen)
+    guys_button = Button((200, 500), "Создатели", creators_menu)
+    guys_button.draw_button(screen)
+    exit_button = Button((200, 600), "Выход", exit)
+    exit_button.draw_button(screen)
+    buttons = [start_button, info_button, guys_button, exit_button]
+    running = True
+
+    while running:
+        # внутри игрового цикла ещё один цикл
+        # приёма и обработки сообщений
+        for event in pygame.event.get():
+            # при закрытии окна
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for b in buttons:
+                    if b.check_button(event.pos):
+                        b.f()
+                        return
+        # ...
+        # отрисовка и изменение свойств объектов
+        # ...
+        pygame.display.flip()
+
+
+def creators_menu():
+    window = pygame.display.set_mode(size)
+    window.fill((0, 0, 0))
+    menu_name(window)
+    exit_button = Button((200, 700), "Назад", main_menu)
+    exit_button.draw_button(window)
+    font = pygame.font.Font(None, 65)
+    text2 = font.render("Создатели", 1, pygame.Color("Green"))
+    text_x2 = width // 2 - text2.get_width() // 2
+    text_y2 = 200 - text2.get_height() // 2
+    # text_w = text.get_width()
+    # text_h = text.get_height()
+    window.blit(text2, (text_x2, text_y2))
+    running = True
+
+    MYEVENTTYPE = 30
+    pygame.time.set_timer(MYEVENTTYPE, 10)
+    x = width - 327
+    x1 = 0
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if exit_button.check_button(event.pos):
+                    main_menu()
+                    return
+
+            if event.type == MYEVENTTYPE:
+                pygame.draw.rect(window, (0, 0, 0), (0, 380,
+                                                     width, 150))
+                creators_info(window, x, x1)
+                x1 += 2
+                x -= 2
+                if x <= -327:
+                    x = width
+                if x1 >  width:
+                    x1 = -327
+
+        pygame.display.flip()
+
+
+# Имена создателей игры. Приклеивание текста на холст
+def creators_info(screen, x, x1):  # TODO сделать чтобы имена двигались
+    font = pygame.font.Font(None, 65)
+    text1 = font.render("Александр Кох", 1, pygame.Color("Green"))
+    text = font.render("Иван Петренко", 1, pygame.Color("Green"))
+    text_y = 480 - text.get_height() // 2
+    text_y1 = 400 - text1.get_height() // 2
+    screen.blit(text, (x, text_y))
+    screen.blit(text1, (x1, text_y1))
+
+
+def rules_menu():
+    window = pygame.display.set_mode(size)
+    window.fill((0, 0, 0))
+    menu_name(window)
+    exit_button = Button((200, 700), "Назад", main_menu)
+    exit_button.draw_button(window)
+    running = True
+    rules_info(window)
+
+    while running:
+        for event in pygame.event.get():
+            # при закрытии окна
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if exit_button.check_button(event.pos):
+                    main_menu()
+                    return
+        pygame.display.flip()
+
+
+def rules_info(screen):
+    font = pygame.font.Font(None, 30)
+    text = [
+        "Правила", "",
+        "Вы в открытом космосе.",
+        "Управление кораблем возьмите на себя,",
+        "с помощью мыши или стрелок на клавиатуре.",
+        "Остерегайтесь астероидов, летящих навстречу.",
+        "Нажимая ЛКМ или пробел на клавиатуре,",
+        "стреляйте по астероидам и разрушайте их.",
+        "Обратите внимание,",
+        "запасы патронов не бесконечны,",
+        "собирайте всё, что видите.",
+        "Говорят, что на просторах космоса",
+        "можно найти ремнабор или щит",
+        "действующий 10 секунд.",
+        "Удачи сержант."]
+    text_coord = 170
+    for line in text:
+        string_rendered = font.render(line, 1, pygame.Color('green'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = width // 2 - string_rendered.get_width() // 2
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+
+def menu_name(screen):
+    font = pygame.font.Font(None, 80)
+    text = font.render("IKS Space", 1, pygame.Color("Green"))
+    text_x = width // 2 - text.get_width() // 2
+    text_y = 100 - text.get_height() // 2
+    # text_w = text.get_width()
+    # text_h = text.get_height()
+    screen.blit(text, (text_x, text_y))
+
+
+size = width, height = 700, 900
+
+
+# drawText('Game', font, win, (winWidth / 2) - 50, (winHeight / 2) - 50)
+# drawText('Нажмите любую клавишу для начала игры', font, win, (winWidth / 2) - 290, (winHeight / 2) + 20)
+# pygame.display.flip()
+# waitForPlayerToPressKey()
 
 topScore = 0
 while True:
+    main_menu()
     meteorMinSpeed = 1
     meteorMaxSpeed = 5
     bulletSpeed = -20
@@ -230,7 +412,6 @@ while True:
                     playerRect.bottom = event.pos[1]
                     shieldRect.bottom = event.pos[1] + 19
 
-
         if moveLeft and playerRect.left > 0:
             playerRect.move_ip(-1 * playerSpeed, 0)
             shieldRect.move_ip(-1 * playerSpeed, 0)
@@ -275,7 +456,7 @@ while True:
                          'speed': random.randint(2, 5)}
             shields.append(newShield)
 
-        randomNumber2 = random.randint(0, 2500)
+        randomNumber2 = random.randint(0, 2000)
         if randomNumber2 == 7:
             newBonus = {'rect': pygame.Rect(random.randint(0, winWidth - 22), -29, 22, 29),
                         'speed': random.randint(2, 5)}
@@ -406,3 +587,4 @@ while True:
     pygame.display.flip()
     waitForPlayerToPressKey()
     gameOverSound.stop()
+
