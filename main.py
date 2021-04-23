@@ -149,7 +149,6 @@ bonus = pygame.image.load('bonus.png')
 
 win.blit(backgroundImage, (0, 0))
 
-
 class Button:
 
     def __init__(self, coords, name, f):
@@ -177,12 +176,11 @@ class Button:
         else:
             return False
 
-
 def do_something():
     pass
 
-
 def main_menu():
+    pygame.mouse.set_visible(True)
     screen = pygame.display.set_mode(size)
     screen.fill((0, 0, 0))
     menu_name(screen)
@@ -258,7 +256,7 @@ def creators_menu():
 
 
 # Имена создателей игры. Приклеивание текста на холст
-def creators_info(screen, x, x1):  # TODO сделать чтобы имена двигались
+def creators_info(screen, x, x1):
     font = pygame.font.Font(None, 65)
     text1 = font.render("Александр Кох", 1, pygame.Color("Green"))
     text = font.render("Иван Петренко", 1, pygame.Color("Green"))
@@ -365,15 +363,18 @@ while True:
     for i in range(heartQuantity):
         newHeart = {'rect': (5 + 50 * i, 60)}
         hearts.append(newHeart)
-
+    pygame.mouse.set_visible(False)
+    esc_key = 0
     while True:
         score += 1
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 terminate()
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    terminate()
+                    esc_key = 1
+                    break
                 if event.key == K_p:
                     pause()
                 if event.key == K_RIGHT or event.key == K_d:
@@ -412,6 +413,8 @@ while True:
                     playerRect.bottom = event.pos[1]
                     shieldRect.bottom = event.pos[1] + 19
 
+        if esc_key:
+            break
         if moveLeft and playerRect.left > 0:
             playerRect.move_ip(-1 * playerSpeed, 0)
             shieldRect.move_ip(-1 * playerSpeed, 0)
@@ -456,7 +459,7 @@ while True:
                          'speed': random.randint(2, 5)}
             shields.append(newShield)
 
-        randomNumber2 = random.randint(0, 2000)
+        randomNumber2 = random.randint(0, 2500)
         if randomNumber2 == 7:
             newBonus = {'rect': pygame.Rect(random.randint(0, winWidth - 22), -29, 22, 29),
                         'speed': random.randint(2, 5)}
@@ -577,6 +580,8 @@ while True:
         pygame.display.flip()
         mainClock.tick(FPS)
 
+    if esc_key:
+        continue
     pygame.mixer.music.stop()
     gameOverSound.play()
 
